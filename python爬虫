@@ -1,0 +1,21 @@
+import requests
+
+def crawl_baidu_front_page():
+    # 发送 HTTP 请求
+    response = requests.get("https://www.baidu.com")
+
+    # 检查请求是否成功
+    if response.status_code == 200:
+        # 使用 BeautifulSoup 解析 HTML 内容
+        soup = BeautifulSoup(response.text, "html.parser")
+
+        # 提取标题
+        title = soup.title.string
+
+        # 打印标题
+        print("百度首页标题：", title)
+    else:
+        print("请求失败，状态码：", response.status_code)
+
+# 调用函数
+crawl_baidu_front_page()
