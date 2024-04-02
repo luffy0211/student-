@@ -1,1 +1,63 @@
+import requests
+from lxml import etree
 
+#构造请求
+headers ={
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 '
+                  '(KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36'
+          }
+# 定义网页内容解析函数
+def parse(html):
+    selector = etree.HTML(html)
+    #获取每页全部电影信息
+    movie_items =selector.xpath('//li/div/div[@class="info"]')
+    #获取每一部电影的信息
+    for each_movie in movie_items:
+        #获取电影名称
+        movie_title = each_movie.xpath('div[@class=''hd'']/a/span[@class=''title'']/text()')[0]
+        print('电影名称:',movie_title)
+        #获取导演
+        movie_direcor_actor_release = each_movie.xpath('div[@class="bd"]/p[@class=""]/text()')
+        movie_direcor_actor = movie_direcor_actor_release.strip().split('\xa0\xa0\xa0')
+        movie_direcor = movie_direcor_actor[0].split(': ')[1]
+        print('导演',movie_direcor)
+        #获取主演
+        if len(movie_direcor_actor)>1:
+            if ': ' in movie_direcor_actor[1]:
+                movie_actor = movie_direcor_actor[1].split(': ')[1]
+        else:movie_actor =''
+        print('主演',movie_actor)
+
+        #提取上映时间，地区，剧情
+        movie_release = movie_direcor_actor_release[1].split('\xa0\xa0')
+        movie_year = movie_release[0]
+        print('上映时间',movie_year)
+        movie_arse = movie_release[1]
+        print('上映地区',movie_arse)
+        movie_jq = movie_release[2]
+        print('剧情',movie_jq)
+        yield {
+            '电影名称':movie_title,
+            '导演':movie_direcor,
+            '主演':movie_actor,
+            '上映时间':movie_year,
+            '上映地区':movie_arse,
+            '剧情':movie_jq
+        }
+
+
+#定义保存函数
+def save_data():
+    with open('douban_top250.txt','w',encoding='utf8') as f :
+        for i in range(10):
+            #构造url
+            url ='https://movie.douban.com/top250?start=' + str(i*25) + '&filter='
+            print(url)
+            #解析网页
+            response = requests.get(url=url,headers=headers)
+            html = response.text
+            #调用网页内容函数
+            for item in parse(html):
+                f.write(str(item))
+if __name__ =='_main_':
+    save_data()
