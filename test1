@@ -1,0 +1,28 @@
+import tensorflow as tf
+from sklearn.datasets import load_iris
+from sklearn.model_selection import train_test_split
+iris = load_iris()
+X = iris.data
+y = iris.target
+model = tf.keras.models.Sequential()
+model.add(tf.keras.layers.Dense(128, activation='relu', input_shape=(4,))) 
+model.add(tf.keras.layers.Dense(64, activation='relu'))
+model.add(tf.keras.layers.Dense(3, activation='softmax')) 
+model.compile(optimizer='adam', 
+              loss='sparse_categorical_crossentropy',
+              metrics=['accuracy'])
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+history = model.fit(X_train, y_train, epochs=50, batch_size=16, validation_split=0.1)
+
+test_loss, test_acc = model.evaluate(X_test, y_test)
+print('Test loss:', test_loss)
+print('Test accuracy:', test_acc)
+
+predictions = model.predict(X_test)
+
+predicted_classes = np.argmax(predictions, axis=1)
+class_names = ['setosa', 'versicolor', 'virginica']
+predicted_class_names = np.array(class_names)[predicted_classes]
+
+print(predicted_class_names)
