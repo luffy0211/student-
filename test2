@@ -1,0 +1,60 @@
+import tensorflow as tf
+from tensorflow.keras.layers import Dense, Flatten
+
+import numpy as np  
+import matplotlib.pyplot as plt  
+
+data = np.load('d:/mnist.npz')  
+  
+train_images = data['x_train']  
+train_labels = data['y_train']  
+  
+first_image = train_images[5]  
+label = train_labels[5]  
+   
+print("第一个图片的完整像素值信息:")  
+print(first_image)  
+
+plt.imshow(first_image, cmap='gray')
+plt.colorbar()   
+plt.title(f'Label: {label}')  
+plt.show() 
+
+import tensorflow as tf
+(x_train, y_train), (x_test, y_test) = tf.keras.datasets.mnist.load_data('d:/mnist.npz')
+print("训练集输入数据 x_train 的形状:", x_train.shape)
+print("训练集标签数据 y_train 的形状:", y_train.shape)
+print("测试集输入数据 x_test 的形状:", x_test.shape)
+print("测试集标签数据 y_test 的形状:", y_test.shape)
+
+x_train,y_train,x_test,y_test
+
+x_train,x_test=x_train/255.0,x_test/255.0
+x_train,x_test
+
+
+x_train,x_test=x_train/255.0,x_test/255.0#归一化处理
+x_train[0],x_test[0]
+
+model = tf.keras.models.Sequential()
+model.add(Flatten(input_shape=(28, 28)))
+model.add(Dense(128, activation='relu'))
+model.add(Dense(10, activation='softmax'))
+
+
+model.compile(optimizer='adam',loss='sparse_categorical_crossentropy',metrics=['accuracy'])
+
+model.fit(x_train, y_train, epochs=5)
+
+
+model.evaluate(x_test, y_test, verbose=2)
+
+
+import matplotlib.pyplot as plt
+import cv2
+for i in range(30):
+    image = plt.imread('d:/testimages/'+str(i)+'.jpg')
+    image_new = image.reshape([1, 28, 28])
+    result = model.predict(image_new)[0].argmax()
+    print('第', i, ' 张照片中的数字是：', result)
+
