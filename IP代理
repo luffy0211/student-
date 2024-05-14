@@ -1,0 +1,91 @@
+import requests
+from bs4 import BeautifulSoup
+import time
+import random
+#构造请求头
+headers = {
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) '
+                  'Chrome/80.0.3987.163 Safari/537.36'
+
+}
+#定义空列表存放代理IP
+proxies_list = []
+proxies_dict={}
+
+#定义函数获取ip
+def get_ip():
+    #定义url
+    # url1 = 'https://www.kuaidaili.com/ops/proxylist/4/#freeList'
+    # url2 = 'https://www.kuaidaili.com/ops/proxylist/2/#freeList'
+    # url3 = 'https://www.kuaidaili.com/ops/proxylist/3/#freeList'
+    for i in range(3):
+        #构造请求url
+        url = 'https://www.kuaidaili.com/ops/proxylist/' + str(i+1) + '/#freeList'
+        response = requests.get(url, headers=headers)
+
+        html = response.text
+        parse_ip(html)
+
+#获取端口，ip，PORT
+def parse_ip(html):
+    """从HTML文本中解析IP地址和端口号，并将其存储到proxies_list列表中。"""
+    soup = BeautifulSoup(html, 'lxml')
+    data=soup.find('div',id='freeList').find('table').find('tbody',class_='center')
+    tr_list = data.find_all('tr')
+    ip_list = tr_list[1:]
+    for tr in ip_list:
+        tr = tr.find_all('td')
+        td =BeautifulSoup(str(tr),'lxml')
+        try :
+            http_type = td.find(attrs={'data-title':'类型'}).get_text().split(',')[1].strip()
+        except :
+            http_type = td.find(attrs={'data-title':'类型'}).get_text().strip()
+        #获取ip
+        ip = td.find(attrs={'data-title':'IP'}).get_text().strip()
+        #获取端口
+        port = td.find(attrs={'data-title':'PORT'}).get_text().strip()
+        proxies_dict[http_type]=ip + '+'+ port
+        proxies_list.append(proxies_dict)
+
+    # trs = soup.find('tr')
+    # for tr in trs:
+    #     tds = tr.find_all('td')
+    #     if len(tds) > 0:
+    #         ip = tds[0].text.strip()  # 修改此处
+    #         port = tds[1].text.strip()  # 修改此处
+    #         proxies_list.append({ f'{ip}:{port}'})
+#检测代理IP是否可用
+def check_ip():
+    url = 'https://www.baidu.com/'
+    can_use_ip = []
+    for ip  in proxies_list:
+        try:
+            response = requests.get(url=url, headers=headers,proxies=ip, timeout=3)
+            if response.status_code == 200:
+                can_use_ip.append(ip)
+        except:
+            print(f'IP地址:{list(ip.values())[0]}无效:')
+        else:
+                print(f'IP地址:{list(ip.values())[0]}有效:')
+        return can_use_ip
+#随机选择代理IP，采集数据
+def choice_ip(can_use_ip_list):
+    proxies_pool = can_use_ip_list
+    ip = random.choice(proxies_pool)
+    print('随机选择代理IP:',ip)
+    url = 'https://www.maoyan.com/'
+    response = requests.get(url=url, headers=headers,proxies=ip, timeout=3)
+    html = response.text
+    with open ('maoyan.html','w',encoding='utf-8') as f:
+        f.write(html)
+
+if __name__ == '__main__':
+    get_ip()
+    print(proxies_list)
+    can_use_ip = check_ip()
+    print('所以可用代理IP:',proxies_list)
+    choice_ip(can_use_ip)
+
+
+
+
