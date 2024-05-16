@@ -1,0 +1,45 @@
+#案例1英文
+from PIL import Image
+import pytesseract
+
+def img_iden(img_name):
+    #生成一个对象
+    img = Image.open(img_name)
+    character = pytesseract.image_to_string(img)
+    character = character.strip()
+    with open('pic_test_8.txt','w',encoding='utf-8') as f:
+        f.write(character)
+    return character
+
+result = img_iden('pic_test_8.tif')
+
+print(result)
+
+#
+# if __name__ == '__main__':
+#案例2中文
+# from PIL import Image
+# import pytesseract
+#
+# def img_iden(img_name,lang_name):
+#     #生成一个对象
+#     img = Image.open(img_name)
+#
+#     character = pytesseract.image_to_string(img,lang=lang_name)
+#     character = character.strip()
+#     with open('pic_test_4.txt','w',encoding='utf-8') as f:
+#         f.write(character)
+#     return character
+#
+# result = img_iden('pic_test_4.tif','chi_sim')
+# print(result)
+#案例3降噪处理
+#对图像二值化
+# from PIL import Image
+# import pytesseract
+# img = Image.open('pic_test_5.tif')
+# #降噪处理
+# img = img.point(lambda x: 0 if x < 30 else 255)
+# img.save('pic_test_5_backup.tif')
+#
+#
